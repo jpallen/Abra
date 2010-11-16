@@ -1,0 +1,15 @@
+Weclome to Abra, a tensor algebra toolkit written in Ruby.
+
+Structure
+---------
+
+Consider an expression like:
+
+A_a^b ( B^{a c} C_{c b} + D^a_b ) 
+
+Each tensor in this expression is a Symbol. Atoms have many indices (Index class)
+For each index, there is an Index Structure. For a Symbol, each IndexStructure will
+just point to the corresponding Index. However, for Sums, each IndexStructure will
+point to all of the indices in the individual terms which are the same index 
+mathematically. It is thus IndexStructures which are recorded as being contracted
+with one another.
