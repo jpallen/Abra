@@ -1,3 +1,8 @@
+require 'rubygems'
+require 'treetop'
+
+require 'abra/parser/parser'
+
 require 'abra/logger'
 
 require 'abra/expression/base'
@@ -6,7 +11,9 @@ require 'abra/expression/index'
 require 'abra/expression/sum'
 require 'abra/expression/product'
 
+require 'abra/helpers'
 
+include Abra
 include Abra::Expression
 
 @e = 
@@ -21,7 +28,7 @@ Product.new(:terms => [
     Index.new(:label => 'b')
   ]),
   Abra::Expression::Symbol.new(:label => 'B', :indices => [
-    Index.new(:label => 'a', :position => Index::POSITION_UP),
+    Index.new(:label => 'd', :position => Index::POSITION_UP),
     Index.new(:label => 'c')
   ])
 ])

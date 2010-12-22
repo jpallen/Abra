@@ -1,0 +1,120 @@
+# This is an implementation of a TeX-like syntax for inputing expressions
+# into Abra.
+#
+# Some notable differences from TeX include the ability to stack more than one
+# pair of subscript and superscript indices:
+#   A_{a b}^{c d}_e
+grammar ExpressionGrammar
+  # A list of symbols separated by whitespace. This is interpreted as a product.
+  # For example, 'A B_{c d} E^c'.
+  rule symbol_list
+    symbol " "* symbol_list {
+      def expression
+        product = symbol_list.expression
+        if product.is_a?(Abra::Expression::Symbol)
+          return Abra::Expression::Product.new(:terms => [symbol.expression, product])
+        else
+          product.insert_term!(symbol.expression, :position => :start)
+          return product
+        end
+      end
+    } / 
+    symbol
+  end
+  
+  # A symbol is a base symbol along with some possible indices. 
+  # For example, 'A', '\alpha' and 'a_{b c}^c'.
+  rule symbol
+    symbol_base index_group_list {
+      def expression
+        symbol = symbol_base.expression
+        symbol.add_indices!(index_group_list.indices)
+        return symbol
+      end
+    } /
+    symbol_base
+  end
+  
+  # The base of a symbol may be either some letters, or a TeX-like
+  # command. For example, 'a', 'foo' and '\alpha'.
+  # TOD: Allow more complicated symbols like '\bar{a}'
+  rule symbol_base
+    '\\'? [a-zA-Z]+ {
+      def expression
+        Abra::Expression::Symbol.new(:label => text_value)
+      end
+    }
+  end
+  
+  # An index can have the same form as a symbol, although without
+  # without further indices.
+  rule index
+    '\\'? [a-zA-Z]+ {
+      def indices
+        Array(Abra::Expression::Index.new(:label => text_value))
+      end
+    }
+  end
+  
+  # And index list is a list of indices separated with whitespace.
+  # For example, 'a b c' or just 'd'.
+  rule index_list
+    index " "* index_list {
+      def indices
+        index.indices + index_list.indices
+      end
+    } / 
+    index
+  end
+  
+  # An index_group is an index_list surrounded by the correct modifiers 
+  # to make it subscript or superscript. For example '^{a b c}' or '_d'
+  rule index_group
+    subscript_index_group / superscript_index_group
+  end
+  
+  # An index_group_list is a list of index_groups separated by whitespace.
+  # For example, '^{abc}_d' or '_{a b}^{d e}_{f g}'
+  rule index_group_list
+    index_group index_group_list {
+      def indices
+        index_group.indices + index_group_list.indices
+      end
+    } /
+    index_group
+  end
+  
+  rule subscript_index_group
+    '_{' index_list '}' {
+      def indices
+        indices = index_list.indices
+        indices.each{|i| i.position = Expression::Index::POSITION_DOWN}
+        return indices
+      end
+    } / 
+    '_' index {
+      def indices
+        indices = index.indices
+        indices.each{|i| i.position = Expression::Index::POSITION_DOWN}
+        return indices
+      end
+    }
+  end
+
+  rule superscript_index_group
+    '^{' index_list '}' {
+      def indices
+        indices = index_list.indices
+        indices.each{|i| i.position = Expression::Index::POSITION_UP}
+        return indices
+      end
+    } / 
+    '^' index {
+      def indices
+        indices = index.indices
+        indices.each{|i| i.position = Expression::Index::POSITION_UP}
+        return indices
+      end
+    }
+  end
+end
