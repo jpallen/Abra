@@ -76,7 +76,13 @@ module Abra
       end
       
       def inspect
-        self.terms.map{|o| o.inspect}.join(' ')
+        self.terms.map{|t| 
+          if t.is_a?(Sum)
+            "(#{t.inspect})"
+          else 
+            t.inspect
+          end
+        }.join(' ')
       end
     end
   end

@@ -1,15 +1,16 @@
 require 'rubygems'
 require 'treetop'
 
-require 'abra/parser/parser'
+require File.dirname(__FILE__) + '/abra/parser/parser'
 
-require 'abra/logger'
+require File.dirname(__FILE__) + '/abra/logger'
 
-require 'abra/expression/base'
-require 'abra/expression/symbol'
-require 'abra/expression/index'
-require 'abra/expression/sum'
-require 'abra/expression/product'
+require File.dirname(__FILE__) + '/abra/expression/base'
+require File.dirname(__FILE__) + '/abra/expression/symbol'
+require File.dirname(__FILE__) + '/abra/expression/index'
+require File.dirname(__FILE__) + '/abra/expression/distributed_index'
+require File.dirname(__FILE__) + '/abra/expression/sum'
+require File.dirname(__FILE__) + '/abra/expression/product'
 
-require 'abra/helpers'
+require File.dirname(__FILE__) + '/abra/helpers'
 

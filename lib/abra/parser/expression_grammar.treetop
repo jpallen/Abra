@@ -5,21 +5,53 @@
 # pair of subscript and superscript indices:
 #   A_{a b}^{c d}_e
 grammar ExpressionGrammar
-  # A list of symbols separated by whitespace. This is interpreted as a product.
-  # For example, 'A B_{c d} E^c'.
-  rule symbol_list
-    symbol " "* symbol_list {
+  rule expression
+    sum
+  end
+  
+  rule sum
+    product space "+" space sum {
       def expression
-        product = symbol_list.expression
-        if product.is_a?(Abra::Expression::Symbol)
-          return Abra::Expression::Product.new(:terms => [symbol.expression, product])
+        real_sum = sum.expression
+        unless real_sum.is_a?(Abra::Expression::Sum)
+          return Abra::Expression::Sum.new(:terms => [product.expression, real_sum])
         else
-          product.insert_term!(symbol.expression, :position => :start)
-          return product
+          real_sum.insert_term!(product.expression, :position => :start)
+          return real_sum
         end
       end
-    } / 
-    symbol
+    }
+    / 
+    product
+  end
+
+  # A list of symbols separated by whitespace. This is interpreted as a product.
+  # For example, 'A B_{c d} E^c'. May also just be a product of one symbol
+  rule product
+    primary space product {
+      def expression
+        real_product = product.expression
+        unless real_product.is_a?(Abra::Expression::Product)
+          return Abra::Expression::Product.new(:terms => [primary.expression, real_product])
+        else
+          real_product.insert_term!(primary.expression, :position => :start)
+          return real_product
+        end
+      end
+    } /
+    primary
+  end
+  
+  # And object which comes as an atom, like a symbol or an expression
+  # surrounded by brackets
+  rule primary
+    symbol 
+    /
+    '(' space sum space ')' {
+      def expression
+        sum.expression
+      end
+    }
   end
   
   # A symbol is a base symbol along with some possible indices. 
@@ -59,7 +91,7 @@ grammar ExpressionGrammar
   # And index list is a list of indices separated with whitespace.
   # For example, 'a b c' or just 'd'.
   rule index_list
-    index " "* index_list {
+    index space index_list {
       def indices
         index.indices + index_list.indices
       end
@@ -116,5 +148,9 @@ grammar ExpressionGrammar
         return indices
       end
     }
+  end
+  
+  rule space
+    " "*
   end
 end

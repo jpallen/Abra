@@ -1,6 +1,6 @@
 require File.join(File.dirname(__FILE__) + '/..', 'spec_helper')
 
-describe Abra::Expression::Product, '#contract_indices_based_on_labels' do
+describe Abra::Expression::Product, '#contract_indices_based_on_labels!' do
   it 'should contract indices with the same label' do
     e = Abra::Parser.parse('A_{a b} B_{b c}')
     e.contract_indices_based_on_labels!(:position_matters => false)
