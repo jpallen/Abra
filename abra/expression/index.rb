@@ -23,14 +23,34 @@ module Abra
         @position = position
       end
       
-      # Another Index that this may be contracted with. Should be nil if the 
+      # Another Index that this may be contracted with. Will be nil if the 
       # index is not contracted
-      attr_accessor :contracted_with
-      def contracted_with=(index) # :nodoc:
-        unless index.is_a?(Index) or index.nil?
+      attr_reader :contracted_with
+      
+      # Contract this index with another one. This will uncontract both indices
+      # if already contracted, and then contract them with each other.
+      def contract_with!(index)
+        unless index.is_a?(Index)
           raise ArgumentError, "can only contract with subclasses of Index"
         end
+        self.uncontract!
+        index.uncontract!
         @contracted_with = index
+        index.instance_variable_set('@contracted_with', self)
+      end
+      
+      # Removes any contraction between this index and another.
+      def uncontract!
+        unless self.contracted_with.nil?
+          self.contracted_with.instance_variable_set('@contracted_with', nil)
+          @contracted_with = nil
+        end
+      end
+      
+      # Returns true if the index is contracted with another.
+      # Otherwise returns false.
+      def contracted?
+        not @contracted_with.nil?
       end
 
       def initialize(options = {})
