@@ -11,7 +11,29 @@ module Abra
       end
       
       def inspect
-        self.label
+        str = self.label
+        # Write indices as S_{a b c}^{d e}_{f g}
+        unless indices.empty?
+          current_position = indices.first.position
+          # Collect the indices into groups based on their position
+          # In the above, we would end up with index_groups = [[a, b, c], [d, e], [f, g]]
+          index_groups = [[]] 
+          for index in indices
+            if current_position == index.position
+              index_groups.last << index
+            else
+              index_groups << [index] # new group
+            end
+            current_position = index.position
+          end
+          
+          for index_group in index_groups
+            str += index_group.first.position == Index::POSITION_UP ? '^{' : '_{'
+            str += index_group.collect{|i| i.label}.join(' ')
+            str += '}'
+          end
+        end
+        return str
       end
     end
   end
