@@ -52,7 +52,7 @@ module Abra
       #   Default is true.
       def contract_indices_based_on_labels!(options = {})
         options = {
-          :position_matters => true
+          :position_matters => false
         }.merge(options)
         indices = self.terms.collect{|t| t.indices}.flatten
         # Reject any indices which are already contracted
@@ -62,7 +62,7 @@ module Abra
           index = indices.pop
           indices_with_same_label = indices.select{|i| i.label == index.label}
           if indices_with_same_label.size > 1
-            Abra.logger.warn("I found more than 2 indices with the label #{index.label} and don't know what to do")
+            Abra.logger.warn("I found more than 2 indices with the label '#{index.label}' and don't know what to do")
           elsif indices_with_same_label.size == 1
             contract_with = indices_with_same_label.first
             if (not options[:position_matters] or

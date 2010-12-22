@@ -88,14 +88,14 @@ grammar ExpressionGrammar
     '_{' index_list '}' {
       def indices
         indices = index_list.indices
-        indices.each{|i| i.position = Expression::Index::POSITION_DOWN}
+        indices.each{|i| i.position = Abra::Expression::Index::POSITION_DOWN}
         return indices
       end
     } / 
     '_' index {
       def indices
         indices = index.indices
-        indices.each{|i| i.position = Expression::Index::POSITION_DOWN}
+        indices.each{|i| i.position = Abra::Expression::Index::POSITION_DOWN}
         return indices
       end
     }
@@ -105,14 +105,14 @@ grammar ExpressionGrammar
     '^{' index_list '}' {
       def indices
         indices = index_list.indices
-        indices.each{|i| i.position = Expression::Index::POSITION_UP}
+        indices.each{|i| i.position = Abra::Expression::Index::POSITION_UP}
         return indices
       end
     } / 
     '^' index {
       def indices
         indices = index.indices
-        indices.each{|i| i.position = Expression::Index::POSITION_UP}
+        indices.each{|i| i.position = Abra::Expression::Index::POSITION_UP}
         return indices
       end
     }
