@@ -6,8 +6,34 @@ module Abra
       attr_accessor :label
 
       def initialize(options = {})
-        self.label = options[:label] if options.has_key?(:label)
-        self.indices = options[:indices] if options.has_key?(:label)
+        @label   = options[:label] if options.has_key?(:label)
+        @indices = options[:indices] if options.has_key?(:label)
+      end
+      
+      # Associates an array of indices to the symbol.
+      #
+      # By default these are added to the end of the symbol's existing indices
+      # but this can be overridden with the :position option. This can be either
+      # :start, :end, or an integer.
+      def add_indices!(indices, options = {})
+        options = {
+          :position => :end
+        }.merge(options)
+        
+        unless indices.is_a?(Array) and indices.reject{|i| i.is_a?(Index)}.empty?
+          raise ArgumentError, "expected indices to be an Array of Index instances"
+        end
+        
+        position = options[:position]
+        if position == :start
+          position = 0
+        elsif position == :end
+          position = self.indices.length
+        elsif position > self.indices.length
+          raise ArgumentError, "position exceeds number of terms"
+        end
+        
+        @indices.insert(position, *indices)
       end
       
       def inspect

@@ -6,7 +6,7 @@ module Abra
       # the whole expression has the indices [a], whereas the F has the 
       # indices [a, b]. How this is implemented will depend on the 
       # type of expression (Symbol, Sum, Product, etc).
-      attr_accessor :indices
+      attr_reader :indices
       def indices # :nodoc:
         @indices ||= []
       end

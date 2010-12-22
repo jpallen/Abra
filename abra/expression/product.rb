@@ -13,10 +13,36 @@ module Abra
       def initialize(attributes = {})
         if attributes.has_key?(:terms)
           @terms = attributes[:terms]
-          unless @terms.is_a?(Array) and @terms.select{|t| not t.is_a?(Abra::Expression::Base)}.empty?
+          unless @terms.is_a?(Array) and @terms.select{|t| not t.is_a?(Expression::Base)}.empty?
             raise ArgumentError, "expected :terms to be an Array of Expressions"
           end
         end
+      end
+      
+      # Inserts a term into the product.
+      # 
+      # The term must be an instance of Expression. By default the term is inserted 
+      # at the end of the product but this can be overridden with the :position option. 
+      # :position can be either :start, :end, or an integer.
+      def insert_term!(term, options = {})
+        options = {
+          :position => :end
+        }.merge(options)
+        
+        unless term.is_a?(Expression::Base)
+          raise ArgumentError, "expected term to be an Expression but got #{term}"
+        end
+        
+        position = options[:position]
+        if position == :start
+          position = 0
+        elsif position == :end
+          position = self.terms.length
+        elsif position > self.terms.length
+          raise ArgumentError, "position exceeds number of terms"
+        end
+        
+        @terms.insert(position, term)
       end
       
       # Tries to contract any indices that share the same label.
