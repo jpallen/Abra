@@ -57,6 +57,10 @@ module Abra
         self.label = options[:label] if options.has_key?(:label)
         self.position = options[:position] if options.has_key?(:position)
       end
+      
+      def sanitize!(options = {})
+        # Nothing needs doing
+      end
 
       def inspect
         self.label

@@ -10,6 +10,13 @@ module Abra
       def indices # :nodoc:
         @indices ||= []
       end
+      
+      # Checks each term an ensures that the index data and other structures
+      # are all self consistent. This should be run after parsing, since parsing
+      # only constructs the expressions and doesn't link them together properly.
+      def sanitize!(options = {})
+        raise NotImplementedError, 'subclasses should override sanitize!'
+      end
     end
   end
 end

@@ -26,7 +26,8 @@ module Abra
       # :position can be either :start, :end, or an integer.
       def insert_term!(term, options = {})
         options = {
-          :position => :end
+          :position => :end,
+          :sanitize => true
         }.merge(options)
         
         unless term.is_a?(Expression::Base)
@@ -48,7 +49,7 @@ module Abra
       # Looks through the index structure of each term and creates an overall
       # array of DistributedIndex objects representing the overall index
       # structure of the sum.
-      def group_indices_based_on_labels!(options = {})
+      def extract_distributed_indices_based_on_labels!(options = {})
         options = {
           :position_matters => false
         }.merge(options)
@@ -80,6 +81,11 @@ module Abra
           
           @indices << DistributedIndex.new(:component_indices => index_group)
         end
+      end
+      
+      def sanitize!(options = {})
+        self.terms{|t| t.sanitize!(options)}
+        self.extract_distributed_indices_based_on_labels!(options)
       end
       
       def inspect

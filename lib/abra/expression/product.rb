@@ -75,6 +75,10 @@ module Abra
         end
       end
       
+      def sanitize!(options = {})
+        self.terms.each{|t| t.sanitize!(options)}
+      end
+      
       def inspect
         self.terms.map{|t| 
           if t.is_a?(Sum)
