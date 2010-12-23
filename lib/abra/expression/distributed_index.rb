@@ -38,6 +38,20 @@ module Abra
           @label = @component_indices.first.label
         end
       end
+    
+      def set_contracted_with(index)
+        @contracted_with = index
+        for component_index in self.component_indices do
+          component_index.set_contracted_with(index)
+          component_index.set_contracted_through(self)
+        end
+      end
+      
+      def set_uncontracted
+        self.component_indices.each{|i| i.set_uncontracted}
+        @contracted_with    = nil
+        @contracted_through = nil
+      end
     end
   end
 end

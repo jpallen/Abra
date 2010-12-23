@@ -1,6 +1,6 @@
 module Abra
   module Expression
-    class Index < Base
+    class Index
       # The letter or symbol used to display the index. This needs to be valid
       # LaTeX to display properly.
       attr_accessor :label
@@ -27,6 +27,11 @@ module Abra
       # index is not contracted
       attr_reader :contracted_with
       
+      # If this index is on a term in a sum then the contraction will be done
+      # with the DistributedIndex on the sum. This records that instance and allows
+      # us to access it.
+      attr_reader :contracted_through
+      
       # Contract this index with another one. This will uncontract both indices
       # if already contracted, and then contract them with each other.
       def contract_with!(index)
@@ -35,15 +40,18 @@ module Abra
         end
         self.uncontract!
         index.uncontract!
-        @contracted_with = index
-        index.instance_variable_set('@contracted_with', self)
+        self.set_contracted_with(index)
+        index.set_contracted_with(self)
       end
       
       # Removes any contraction between this index and another.
-      def uncontract!
-        unless self.contracted_with.nil?
-          self.contracted_with.instance_variable_set('@contracted_with', nil)
-          @contracted_with = nil
+      def uncontract!(uncontract_other = true)
+        if not self.contracted_through.nil?
+          # Also takes care of uncontracting this
+          self.contracted_through.uncontract!
+        elsif not self.contracted_with.nil?  
+          self.contracted_with.uncontract!(false) if uncontract_other
+          self.set_uncontracted
         end
       end
       
@@ -64,6 +72,20 @@ module Abra
 
       def inspect
         self.label
+      end
+      
+    protected
+      def set_contracted_with(index)
+        @contracted_with = index
+      end
+      
+      def set_contracted_through(index)
+        @contracted_through = index
+      end
+      
+      def set_uncontracted
+        @contracted_with    = nil
+        @contracted_through = nil
       end
     end
   end

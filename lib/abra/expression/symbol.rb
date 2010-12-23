@@ -61,6 +61,10 @@ module Abra
         end
         return str
       end
+      
+      def sanitize!(options = {})
+        # Do nothing
+      end
     end
   end
 end

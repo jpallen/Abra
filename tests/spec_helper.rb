@@ -29,6 +29,32 @@ def be_contracted_with(index)
   BeContractedWith.new(index)
 end
 
+class BeContracted
+  def initialize
+  end
+  
+  def matches?(source_index)
+    @source_index = source_index
+    return @source_index.contracted?
+  end
+  
+  def description
+    "be contracted"
+  end
+  
+  def failure_message
+    " expected to be contracted but was not"
+  end
+  
+  def negative_failure_message
+    " not expected to be contracted but was contracted with #{@source_index.contracted_with}"
+  end
+end
+
+def be_contracted
+  BeContracted.new
+end
+
 class Warn
   def initialize(message)
     @message = message
