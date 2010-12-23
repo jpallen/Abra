@@ -11,12 +11,12 @@ grammar ExpressionGrammar
   
   rule sum
     product space "+" space sum {
-      def expression
-        real_sum = sum.expression
+      def expression(properties = {})
+        real_sum = sum.expression(properties)
         unless real_sum.is_a?(Abra::Expression::Sum)
-          return Abra::Expression::Sum.new(:terms => [product.expression, real_sum])
+          return Abra::Expression::Sum.new(:terms => [product.expression(properties), real_sum])
         else
-          real_sum.insert_term!(product.expression, :position => :start)
+          real_sum.insert_term!(product.expression(properties), properties.merge(:position => :start))
           return real_sum
         end
       end
@@ -29,12 +29,12 @@ grammar ExpressionGrammar
   # For example, 'A B_{c d} E^c'. May also just be a product of one symbol
   rule product
     primary space product {
-      def expression
-        real_product = product.expression
+      def expression(properties = {})
+        real_product = product.expression(properties)
         unless real_product.is_a?(Abra::Expression::Product)
-          return Abra::Expression::Product.new(:terms => [primary.expression, real_product])
+          return Abra::Expression::Product.new(:terms => [primary.expression(properties), real_product])
         else
-          real_product.insert_term!(primary.expression, :position => :start)
+          real_product.insert_term!(primary.expression(properties), properties.merge(:position => :start))
           return real_product
         end
       end
@@ -48,8 +48,8 @@ grammar ExpressionGrammar
     symbol 
     /
     '(' space sum space ')' {
-      def expression
-        sum.expression
+      def expression(properties = {})
+        sum.expression(properties)
       end
     }
   end
@@ -58,9 +58,9 @@ grammar ExpressionGrammar
   # For example, 'A', '\alpha' and 'a_{b c}^c'.
   rule symbol
     symbol_base index_group_list {
-      def expression
-        symbol = symbol_base.expression
-        symbol.add_indices!(index_group_list.indices)
+      def expression(properties = {})
+        symbol = symbol_base.expression(properties)
+        symbol.add_indices!(index_group_list.indices(properties))
         return symbol
       end
     } /
@@ -72,8 +72,8 @@ grammar ExpressionGrammar
   # TOD: Allow more complicated symbols like '\bar{a}'
   rule symbol_base
     '\\'? [a-zA-Z]+ {
-      def expression
-        Abra::Expression::Symbol.new(:label => text_value)
+      def expression(properties = {})
+        Abra::Expression::Symbol.new(properties.merge(:label => text_value))
       end
     }
   end
@@ -82,8 +82,8 @@ grammar ExpressionGrammar
   # without further indices.
   rule index
     '\\'? [a-zA-Z]+ {
-      def indices
-        Array(Abra::Expression::Index.new(:label => text_value))
+      def indices(properties = {})
+        Array(Abra::Expression::Index.new(properties.merge(:label => text_value)))
       end
     }
   end
@@ -92,8 +92,8 @@ grammar ExpressionGrammar
   # For example, 'a b c' or just 'd'.
   rule index_list
     index space index_list {
-      def indices
-        index.indices + index_list.indices
+      def indices(properties = {})
+        index.indices(properties) + index_list.indices(properties)
       end
     } / 
     index
@@ -109,8 +109,8 @@ grammar ExpressionGrammar
   # For example, '^{abc}_d' or '_{a b}^{d e}_{f g}'
   rule index_group_list
     index_group index_group_list {
-      def indices
-        index_group.indices + index_group_list.indices
+      def indices(properties = {})
+        index_group.indices(properties) + index_group_list.indices(properties)
       end
     } /
     index_group
@@ -118,15 +118,15 @@ grammar ExpressionGrammar
   
   rule subscript_index_group
     '_{' index_list '}' {
-      def indices
-        indices = index_list.indices
+      def indices(properties = {})
+        indices = index_list.indices(properties)
         indices.each{|i| i.position = Abra::Expression::Index::POSITION_DOWN}
         return indices
       end
     } / 
     '_' index {
-      def indices
-        indices = index.indices
+      def indices(properties = {})
+        indices = index.indices(properties)
         indices.each{|i| i.position = Abra::Expression::Index::POSITION_DOWN}
         return indices
       end
@@ -135,15 +135,15 @@ grammar ExpressionGrammar
 
   rule superscript_index_group
     '^{' index_list '}' {
-      def indices
-        indices = index_list.indices
+      def indices(properties = {})
+        indices = index_list.indices(properties)
         indices.each{|i| i.position = Abra::Expression::Index::POSITION_UP}
         return indices
       end
     } / 
     '^' index {
-      def indices
-        indices = index.indices
+      def indices(properties = {})
+        indices = index.indices(properties)
         indices.each{|i| i.position = Abra::Expression::Index::POSITION_UP}
         return indices
       end

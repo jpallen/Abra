@@ -9,8 +9,8 @@ module Abra
       # whether the index should be displayed as a subscript or superscript.
       attr_accessor :position
       
-      POSITION_UP = :up
-      POSITION_DOWN = :down
+      POSITION_UP   = 'Index::POSITION_UP'
+      POSITION_DOWN = 'Index::POSITION_DOWN'
       
       def position # :nodoc:
         @position ||= POSITION_DOWN
@@ -23,8 +23,21 @@ module Abra
         @position = position
       end
       
+      # Set to true if the superscript or subscript property of the index 
+      # if relevant to its meaning.
+      attr_accessor :position_matters
+      def position_matters=(value)
+        @position_matters = !!value # Ensure boolean
+      end
+      
+      # Is true if the superscript or subscript property of the index 
+      # if relevant to its meaning.
+      def position_matters?
+        self.position_matters
+      end
+      
       # Another Index that this may be contracted with. Will be nil if the 
-      # index is not contracted
+      # index is not contracted.
       attr_reader :contracted_with
       
       # If this index is on a term in a sum then the contraction will be done
@@ -61,13 +74,18 @@ module Abra
         not @contracted_with.nil?
       end
 
-      def initialize(options = {})
-        self.label = options[:label] if options.has_key?(:label)
-        self.position = options[:position] if options.has_key?(:position)
-      end
-      
-      def sanitize!(options = {})
-        # Nothing needs doing
+      def initialize(properties = {})
+        self.label    = properties[:label] if properties.has_key?(:label)
+        self.position = properties[:position] if properties.has_key?(:position)
+        
+        properties = Abra::Expression.default_properties.merge(properties)
+        
+        self.position_matters = !!properties[:index_position_matters]
+        if properties[:index_position_matters_for].include?(self.label)
+          self.position_matters = true
+        elsif properties[:index_position_does_not_matter_for].include?(self.label)
+          self.position_matters = false
+        end
       end
 
       def inspect

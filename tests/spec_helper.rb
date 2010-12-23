@@ -63,8 +63,8 @@ class Warn
   def matches?(block)
     old_messages = Abra.logger.messages.dup
     block.call
-    new_messages = Abra.logger.messages - old_messages
-    for message in new_messages do
+    @new_messages = Abra.logger.messages - old_messages
+    for message in @new_messages do
       return true if message[:message] == @message and message[:level] == Abra::Logger::WARN
     end
     return false
@@ -75,7 +75,8 @@ class Warn
   end
   
   def failure_message
-    " expected to log a warning: #{@message}"
+    " expected to log a warning: #{@message}\n" + 
+    " but only got:\n #{@new_messages.select{|m| m[:level] == Abra::Logger::WARN}.collect{|m| "\t" + m[:message]}.join("\n")}\n"
   end
   
   def negative_failure_message

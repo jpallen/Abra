@@ -16,6 +16,11 @@ module Abra
           unless @terms.is_a?(Array) and @terms.select{|t| not t.is_a?(Expression::Base)}.empty?
             raise ArgumentError, "expected :terms to be an Array of Expressions"
           end
+          
+          unless @terms.empty?
+            collect_indices_from_term!(@terms.first, :first_term => true)
+            @terms[1..-1].each{|t| collect_indices_from_term! t }
+          end
         end
       end
       
@@ -26,8 +31,7 @@ module Abra
       # :position can be either :start, :end, or an integer.
       def insert_term!(term, options = {})
         options = {
-          :position => :end,
-          :sanitize => true
+          :position => :end
         }.merge(options)
         
         unless term.is_a?(Expression::Base)
@@ -44,52 +48,48 @@ module Abra
         end
         
         @terms.insert(position, term)
-      end
-      
-      # Looks through the index structure of each term and creates an overall
-      # array of DistributedIndex objects representing the overall index
-      # structure of the sum.
-      def extract_distributed_indices_based_on_labels!(options = {})
-        options = {
-          :position_matters => false
-        }.merge(options)
         
-        index_groups = []
-        for term in terms do
-          for index in term.indices
-            index_matched = false
-            for index_group in index_groups
-              if index.label == index_group.first.label
-                unless options[:position_matters] and index.position != index_group.first.position
-                  index_group << index
-                  index_matched = true
-                  break
-                end
-              end
-            end
-            unless index_matched
-              index_groups << [index]
-            end
-          end
-        end
-        
-        @indices = []
-        for index_group in index_groups
-          unless index_group.size == terms.size
-            Abra.logger.warn("The index '#{index_group.first.label}' is not consistant across all terms")
-          end
-          
-          @indices << DistributedIndex.new(:component_indices => index_group)
-        end
-      end
-      
-      def sanitize!(options = {})
-        self.terms{|t| t.sanitize!(options)}
-        self.extract_distributed_indices_based_on_labels!(options)
+        self.collect_indices_from_term!(term)
       end
       
       def inspect
         self.terms.map{|o| o.inspect}.join(' + ')
+      end
+      
+    private
+      # Extracts the indices from a newly inserted term and links them into
+      # the sum's DistributedIndex objects.
+      def collect_indices_from_term!(term, options = {})
+        options = {
+          :first_term => false
+        }.merge(options)
+        
+        remaining_distributed_indices = self.indices.dup
+        for index in term.indices
+          # Try to find an existing distributed index with this label and same position
+          # if it matters
+          distributed_index = remaining_distributed_indices.select{|i|
+            match = (i.label == index.label)
+            if index.position_matters? or i.position_matters?
+              match = false if index.position != i.position
+            end
+            match
+          }.first
+          if distributed_index.nil?
+            unless options[:first_term]
+              Abra.logger.warn("The index '#{index.label}' is not present in all terms")
+            end
+            self.indices << DistributedIndex.new(:component_indices => [index])
+          else
+            remaining_distributed_indices.reject!{|i| i == index}
+            distributed_index.add_component_index!(index)
+          end
+        end
+        unless remaining_distributed_indices.empty?
+          for index in remaining_distributed_indices
+            Abra.logger.warn("The index '#{index.label}' is not present in all terms")
+          end
+        end
       end
     end
   end

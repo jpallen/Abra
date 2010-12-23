@@ -11,7 +11,7 @@ module Abra
     # If we want to contract with the indices in a sum, we do so with the
     # DistributedIndex instances.
     class DistributedIndex < Index
-      POSITION_MIXED = :mixed
+      POSITION_MIXED = 'DistributedIndex::POSITION_MIXED'
       
       # An array of the index on each of the terms that contribute 
       # to this index in the overall index structure.
@@ -23,19 +23,11 @@ module Abra
       
       def initialize(attributes = {})
         if attributes.has_key?(:component_indices)
-          @component_indices = attributes[:component_indices]
-          unless @component_indices.is_a?(Array) and @component_indices.select{|i| not i.is_a?(Index)}.empty?
+          unless attributes[:component_indices].is_a?(Array) and attributes[:component_indices].select{|i| not i.is_a?(Index)}.empty?
             raise ArgumentError, "expected :component_indices to be an Array of Index instances"
           end
-        
-          positions = @component_indices.collect{|i| i.position}.uniq
-          if positions.size == 1
-            @position = positions.first
-          else
-            @position = POSITION_MIXED
-          end
           
-          @label = @component_indices.first.label
+          attributes[:component_indices].each{|i| self.add_component_index! i }
         end
       end
     
@@ -51,6 +43,21 @@ module Abra
         self.component_indices.each{|i| i.set_uncontracted}
         @contracted_with    = nil
         @contracted_through = nil
+      end
+      
+      def add_component_index!(index) # :nodoc:
+        @component_indices ||= []
+        @component_indices << index
+        
+        # Recalculate over all position
+        positions = @component_indices.collect{|i| i.position}.uniq
+        if positions.size == 1
+          @position = positions.first
+        else
+          @position = POSITION_MIXED
+        end
+        
+        @label = @component_indices.first.label
       end
     end
   end
