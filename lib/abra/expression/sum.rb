@@ -29,8 +29,8 @@ module Abra
       # The term must be an instance of Expression. By default the term is inserted 
       # at the end of the sum but this can be overridden with the :position option. 
       # :position can be either :start, :end, or an integer.
-      def insert_term!(term, options = {})
-        options = {
+      def insert_term!(term, properties = {})
+        properties = {
           :position => :end
         }.merge(options)
         
@@ -38,7 +38,7 @@ module Abra
           raise ArgumentError, "expected term to be an Expression but got #{term}"
         end
         
-        position = options[:position]
+        position = properties[:position]
         if position == :start
           position = 0
         elsif position == :end

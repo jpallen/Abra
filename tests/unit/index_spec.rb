@@ -3,7 +3,6 @@ require File.join(File.dirname(__FILE__) + '/..', 'spec_helper')
 describe 'Index contracted with Index' do
   before do
     @e = Abra::Parser.parse('A_a B^a')
-    @e.contract_indices_based_on_labels!
   end
   
   it 'should set the correct contraction properties' do
@@ -22,7 +21,6 @@ end
 describe 'Index contracted with DistributedIndex' do
   before do
     @e = Abra::Parser.parse('(A_a + B_a) C^a')
-    @e.contract_indices_based_on_labels!
     @sum = @e.terms.first
   end
   
@@ -56,7 +54,6 @@ end
 describe 'DistributedIndex contracted with DistributedIndex' do
   before do
     @e = Abra::Parser.parse('(A_a + B_a) (C^a + D^a)')
-    @e.contract_indices_based_on_labels!
     @first_sum = @e.terms.first
     @second_sum = @e.terms.last
   end

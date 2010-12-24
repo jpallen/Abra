@@ -1,6 +1,6 @@
 require File.join(File.dirname(__FILE__) + '/..', 'spec_helper')
 
-describe Abra::Expression::Sum, '#extract_distributed_indices_based_on_labels!' do
+describe Abra::Expression::Sum, 'distribued indices' do
   it 'should group indices with the same label' do
     e = Abra::Parser.parse('A_{a b} + B_{a}^{b}', :index_position_matters => false)
     # The bs should be contracted

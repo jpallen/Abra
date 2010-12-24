@@ -2,6 +2,9 @@ module Abra
   module Expression
     def self.system_default_properties
       {
+        :contract_indices                   => true,
+        :contract_indices_for               => [],
+        :do_not_contract_indices_for        => [],
         :index_position_matters             => false,
         :index_position_matters_for         => [],
         :index_position_does_not_matter_for => []
@@ -10,6 +13,13 @@ module Abra
     
     # Set the default properties assigned to expressions when they are parsed
     # from a TeX-like string. Abra understands the following options:
+    # * :contract_indices - true or false depending on whether indices with the same
+    #   label should be automatically contracted. This should be true unless you have 
+    #   good reason to do otherwise.
+    # * :contract_indices_for - An Array of index labels which should be automatically
+    #   contracted.
+    # * :do_not_contract_indices_for - An Array of index labels which should not be 
+    #   automatically contracted.
     # * :index_position_matters - true or false depending on whether the position
     #   of indices as subscript or superscript is relevant. This can be 
     #   overridden on an index by index basis with :position_matters_for
