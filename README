@@ -1,15 +1,9 @@
-Weclome to Abra, a tensor algebra toolkit written in Ruby.
+Welcome to Abra, a tensor algebra toolkit written in Ruby.
 
-Structure
----------
-
-Consider an expression like:
-
-A_a^b ( B^{a c} C_{c b} + D^a_b ) 
-
-Each tensor in this expression is a Symbol. Atoms have many indices (Index class)
-For each index, there is an Index Structure. For a Symbol, each IndexStructure will
-just point to the corresponding Index. However, for Sums, each IndexStructure will
-point to all of the indices in the individual terms which are the same index 
-mathematically. It is thus IndexStructures which are recorded as being contracted
-with one another.
+Abra is currently a work in progress. The aim is to write 
+a flexible and extendable toolkit to make automated manipulation
+of tensors an easy task. Algebra involving index contractions,
+substitutions and other manipulations is a unique challenge, but it
+lends itself well to an object oriented approach. Hopefully
+working with the strengths and conventions of Ruby will lead us to
+create a modern and very useable package.
