@@ -18,6 +18,11 @@ module Abra
         # Non-commutitivity etc. eventually.
       end
       
+      def load_from_serialization!(serialization, indices)
+        @label = serialization[:label]
+        @indices = serialization[:indices].collect{|i| indices[i]}
+      end
+         
       # Returns the free indices on this symbol.
       # TODO: This doesn't currently understand self contractions: R_{a}^{a}
       def indices

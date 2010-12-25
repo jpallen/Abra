@@ -123,6 +123,22 @@ module Abra
           :indices    => serialized_indices
         }
       end
+      
+      def self.build_from_serialization(serialization, indices)
+        type = serialization.delete(:type)
+        klass = eval(type.to_s.camelize)
+        unless klass.ancestors.include?(Abra::Expression::Base)
+          raise ArgumentError, "I can only build Abra::Expression objects from a serialization"
+        end
+        expression = klass.new
+        expression.load_from_serialization!(serialization, indices)
+        return expression
+      end
+      
+      def self.new_from_serialization(serialization)
+        indices = Index.build_indices_from_serialization(serialization[:indices])
+        expression = self.build_from_serialization(serialization[:expression], indices)
+      end
 
       def ==(other)
         self.eql?(other)

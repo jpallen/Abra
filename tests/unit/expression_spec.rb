@@ -21,7 +21,7 @@ describe Abra::Expression::Base, '#serialize' do
   end
 end
 
-describe Abra::Expression::Base, 'eql?' do
+describe Abra::Expression::Base, '#eql?' do
   it 'should consider two different but equivalent expressions to be equal' do
     str = '(A_a + B_{a b} C^b) D^{a c} + E^c'
     e1 = Abra::Parser.parse(str)
@@ -63,5 +63,12 @@ describe Abra::Expression::Base, 'eql?' do
     e2 = Abra::Parser.parse('A_a B^a', :contract_indices => false)
     e1.should_not eql e2
     e1.hash.should_not eql e2.hash    
+  end
+end
+
+describe Abra::Expression::Base, '.new_from_serialization' do
+  it 'should build an expression with the correct propeties' do
+    e = Abra::Parser.parse('(A_{a b} B^b + C_a) D_a', :index_position_matters_for => ['b'])
+    Abra::Expression::Base.new_from_serialization(e.serialize).serialize.should eql e.serialize
   end
 end

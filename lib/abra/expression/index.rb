@@ -80,6 +80,7 @@ module Abra
       def initialize(attributes = {}) # :nodoc:
         @label              = attributes[:label]
         @position           = attributes[:position]
+        @position_matters   = attributes[:position_matters]
         @contracted_with    = attributes[:contracted_with]
         @contracted_through = attributes[:contracted_through]
       end
@@ -109,6 +110,37 @@ module Abra
           :contracted_with    => self.contracted_with,
           :contracted_through => self.contracted_through
         }
+      end
+      
+      def self.build_indices_from_serialization(serialized_indices)
+        # Build up an index object for each index id
+        indices = {}
+        for index_id, index_hash in serialized_indices do
+          type = index_hash.delete(:type)
+          klass = eval(type.to_s.camelize)
+          unless klass.ancestors.include?(Abra::Expression::Index)
+            raise ArgumentError, "I can only build Abra::Expression::Index objects"
+          end
+          
+          indices[index_id] = klass.new(
+            serialized_indices[index_id]
+          )
+        end
+        
+        # The @contracted_with and @contracted_through variables are currently index ids,
+        # so now replace them with the real indices we have.
+        for index_id, index in indices
+          index.replace_index_ids_with_real_indices!(indices)
+        end
+        
+        return indices
+      end
+      
+      def replace_index_ids_with_real_indices!(indices)
+        @contracted_with       = @contracted_with.nil? ? nil : indices[@contracted_with]
+        @contracted_through    = @contracted_through.nil? ? nil : indices[@contracted_through]
+        @component_indices     ||= []
+        @component_indices.map!{|i| indices[i]}
       end
       
     protected

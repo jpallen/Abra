@@ -26,13 +26,7 @@ module Abra
       # in an inconsistent state.      
       def initialize(attributes = {})
         super
-        if attributes.has_key?(:component_indices)
-          unless attributes[:component_indices].is_a?(Array) and attributes[:component_indices].select{|i| not i.is_a?(Index)}.empty?
-            raise ArgumentError, "expected :component_indices to be an Array of Index instances"
-          end
-          
-          attributes[:component_indices].each{|i| self.add_component_index! i }
-        end
+        @component_indices = attributes[:component_indices]
       end
 
       def to_hash
@@ -62,6 +56,11 @@ module Abra
         @position_matters = @component_indices.collect{|i| i.position_matters?}.include?(true)
 
         @label = @component_indices.first.label
+      end
+      
+      def replace_index_ids_with_real_indices!(indices)
+        @contracted_with       = @contracted_with.nil? ? nil : indices[@contracted_with]
+        @contracted_through    = @contracted_through.nil? ? nil : indices[@contracted_through]
       end
     
     protected

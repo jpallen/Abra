@@ -19,3 +19,9 @@ class Array
     end
   end
 end
+
+class String
+  def camelize
+    self.gsub(/(?:^|_)(.)/) { $1.upcase }
+  end
+end

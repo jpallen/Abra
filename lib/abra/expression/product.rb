@@ -14,16 +14,7 @@ module Abra
       # This should not be accessed directly as it can create expressions
       # in an inconsistent state.
       def initialize(attributes = {}) # :nodoc:
-        if attributes.has_key?(:terms)
-          @terms = attributes[:terms]
-          unless @terms.is_a?(Array) and @terms.select{|t| not t.is_a?(Expression::Base)}.empty?
-            raise ArgumentError, "expected :terms to be an Array of Expressions but it was #{@terms}"
-          end
-          
-          # We don't contract the indices here since we also use this to build
-          # up new expressions from serializations, etc. and the contraction
-          # behaviour is handled seperately there.
-        end
+        @terms = attributes[:terms]
       end
       
       # Apply any properties passed when creating the expression.
@@ -31,6 +22,10 @@ module Abra
       # contrated.
       def apply_properties!(properties)
         contract_indices!(properties)
+      end
+
+      def load_from_serialization!(serialization, indices)
+        @terms = serialization[:terms].collect{|t| Abra::Expression::Base.build_from_serialization(t, indices)}
       end
       
       # Returns the free indices at this level of the expression. These indices

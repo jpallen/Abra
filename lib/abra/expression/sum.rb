@@ -38,12 +38,7 @@ module Abra
       # This should not be accessed directly as it can create expressions
       # in an inconsistent state.
       def initialize(attributes = {}) # :nodoc:
-        if attributes.has_key?(:terms)
-          @terms = attributes[:terms]
-          unless @terms.is_a?(Array) and @terms.select{|t| not t.is_a?(Expression::Base)}.empty?
-            raise ArgumentError, "expected :terms to be an Array of Expressions"
-          end
-        end
+        @terms = attributes[:terms]
       end
       
       # Apply any properties passed when creating the expression.
@@ -57,6 +52,11 @@ module Abra
           collect_indices_from_term!(@terms.first, :first_term => true)
           @terms[1..-1].each{|t| collect_indices_from_term! t }
         end
+      end
+      
+      def load_from_serialization!(serialization, indices)
+        @terms = serialization[:terms].collect{|t| Abra::Expression::Base.build_from_serialization(t, indices)}
+        @indices = serialization[:indices].collect{|i| indices[i]}
       end
       
       # Inserts a term into the sum.
@@ -125,7 +125,9 @@ module Abra
               Abra.logger.warn("The index '#{index.label}' is not present in all terms")
             end
             @indices ||= []
-            @indices << DistributedIndex.new(:component_indices => [index])
+            distributed_index = DistributedIndex.new
+            distributed_index.add_component_index!(index)
+            @indices << distributed_index
           else
             remaining_distributed_indices.reject!{|i| i == distributed_index}
             distributed_index.add_component_index!(index)
