@@ -43,9 +43,9 @@ module Abra
       # at the end of the product but this can be overridden with the :position option. 
       # :position can be either :start, :end, or an integer.
       def insert_term!(term, properties = {})
-        properties = Abra::Expression.default_properties.merge({
+        properties = {
           :position => :end
-        }).merge(properties)
+        }.merge(properties)
         
         unless term.is_a?(Expression::Base)
           raise ArgumentError, "expected term to be an Expression but got #{term}"
@@ -61,7 +61,7 @@ module Abra
         end
         
         @terms.insert(position, term)
-        
+                
         contract_indices!(@terms.collect{|i| i.indices}.flatten, properties)
       end
       

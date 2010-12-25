@@ -32,7 +32,7 @@ grammar ExpressionGrammar
       def expression(properties = {})
         real_product = product.expression(properties)
         unless real_product.is_a?(Abra::Expression::Product)
-          return Abra::Expression::Product.new(:terms => [primary.expression(properties), real_product])
+          return Abra::Expression::Product.new(properties.merge(:terms => [primary.expression(properties), real_product]))
         else
           real_product.insert_term!(primary.expression(properties), properties.merge(:position => :start))
           return real_product

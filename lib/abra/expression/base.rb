@@ -123,7 +123,21 @@ module Abra
           :indices    => serialized_indices
         }
       end
+
+      def ==(other)
+        self.eql?(other)
+      end
+
+      def eql?(other)
+        return false unless self.class == other.class
+        self.serialize == other.serialize
+      end
+
+      def hash
+        # These will collide sometimes due to {0 => false}.hash == {1 => true}.hash
+        self.class.hash ^ self.serialize.hash
+      end
     end
   end
-end#
+end
 
