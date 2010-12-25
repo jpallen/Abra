@@ -17,11 +17,11 @@ class BeContractedWith
   end
   
   def failure_message
-    " expected to be contracted with #{@contracted_index} but was contracted with: #{@source_index.contracted_with}"
+    " expected to be contracted with #{@contracted_index.inspect} but was contracted with: #{@source_index.contracted_with.inspect}"
   end
   
   def negative_failure_message
-    " not expected to be contracted with #{@contracted_index}"
+    " not expected to be contracted with #{@contracted_index.inspect}"
   end
 end
 
@@ -47,7 +47,7 @@ class BeContracted
   end
   
   def negative_failure_message
-    " not expected to be contracted but was contracted with #{@source_index.contracted_with}"
+    " not expected to be contracted but was contracted with #{@source_index.contracted_with.inspect}"
   end
 end
 

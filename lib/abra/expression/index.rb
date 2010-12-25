@@ -73,13 +73,21 @@ module Abra
       def contracted?
         not @contracted_with.nil?
       end
-
-      def initialize(properties = {})
-        self.label    = properties[:label] if properties.has_key?(:label)
-        self.position = properties[:position] if properties.has_key?(:position)
-        
+      
+      # Initialize a new Index object and directly set its instance variables.
+      # This should not be accessed directly as it can create expressions
+      # in an inconsistent state.
+      def initialize(attributes = {}) # :nodoc:
+        @label              = attributes[:label]
+        @position           = attributes[:position]
+        @contracted_with    = attributes[:contracted_with]
+        @contracted_through = attributes[:contracted_through]
+      end
+      
+      # Apply any properties passed when creating the expression.
+      def apply_properties!(properties)
         properties = Abra::Expression.default_properties.merge(properties)
-        
+      
         self.position_matters = !!properties[:index_position_matters]
         if properties[:index_position_matters_for].include?(self.label)
           self.position_matters = true

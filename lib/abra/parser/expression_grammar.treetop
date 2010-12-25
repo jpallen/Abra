@@ -14,7 +14,9 @@ grammar ExpressionGrammar
       def expression(properties = {})
         real_sum = sum.expression(properties)
         unless real_sum.is_a?(Abra::Expression::Sum)
-          return Abra::Expression::Sum.new(:terms => [product.expression(properties), real_sum])
+          sum = Abra::Expression::Sum.new(:terms => [product.expression(properties), real_sum])
+          sum.apply_properties!(properties)
+          return sum
         else
           real_sum.insert_term!(product.expression(properties), properties.merge(:position => :start))
           return real_sum
@@ -32,7 +34,9 @@ grammar ExpressionGrammar
       def expression(properties = {})
         real_product = product.expression(properties)
         unless real_product.is_a?(Abra::Expression::Product)
-          return Abra::Expression::Product.new(properties.merge(:terms => [primary.expression(properties), real_product]))
+          product = Abra::Expression::Product.new(:terms => [primary.expression(properties), real_product])
+          product.apply_properties!(properties)
+          return product
         else
           real_product.insert_term!(primary.expression(properties), properties.merge(:position => :start))
           return real_product
@@ -73,7 +77,9 @@ grammar ExpressionGrammar
   rule symbol_base
     '\\'? [a-zA-Z]+ {
       def expression(properties = {})
-        Abra::Expression::Symbol.new(properties.merge(:label => text_value))
+        symbol = Abra::Expression::Symbol.new(:label => text_value)
+        symbol.apply_properties!(properties)
+        return symbol
       end
     }
   end
@@ -83,7 +89,9 @@ grammar ExpressionGrammar
   rule index
     '\\'? [a-zA-Z]+ {
       def indices(properties = {})
-        Array(Abra::Expression::Index.new(properties.merge(:label => text_value)))
+        index = Abra::Expression::Index.new(:label => text_value)
+        index.apply_properties!(properties)
+        return Array(index)
       end
     }
   end

@@ -20,8 +20,12 @@ module Abra
         @component_indices ||= []
         return @component_indices.dup
       end
-      
+
+      # Initialize a new DistributedIndex object and directly set its instance variables.
+      # This should not be accessed directly as it can create expressions
+      # in an inconsistent state.      
       def initialize(attributes = {})
+        super
         if attributes.has_key?(:component_indices)
           unless attributes[:component_indices].is_a?(Array) and attributes[:component_indices].select{|i| not i.is_a?(Index)}.empty?
             raise ArgumentError, "expected :component_indices to be an Array of Index instances"
@@ -47,13 +51,15 @@ module Abra
         @component_indices ||= []
         @component_indices << index
 
-        # Recalculate over all position
+        # Recalculate over all positions
         positions = @component_indices.collect{|i| i.position}.uniq
         if positions.size == 1
           @position = positions.first
         else
           @position = POSITION_MIXED
         end
+        
+        @position_matters = @component_indices.collect{|i| i.position_matters?}.include?(true)
 
         @label = @component_indices.first.label
       end

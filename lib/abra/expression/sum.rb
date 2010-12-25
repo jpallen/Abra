@@ -34,17 +34,28 @@ module Abra
         indices + self.terms.collect{|t| t.all_indices}.flatten
       end
       
-      def initialize(attributes = {})
+      # Initialize a new Sum object and directly set its instance variables.
+      # This should not be accessed directly as it can create expressions
+      # in an inconsistent state.
+      def initialize(attributes = {}) # :nodoc:
         if attributes.has_key?(:terms)
           @terms = attributes[:terms]
           unless @terms.is_a?(Array) and @terms.select{|t| not t.is_a?(Expression::Base)}.empty?
             raise ArgumentError, "expected :terms to be an Array of Expressions"
           end
-          
-          unless @terms.empty?
-            collect_indices_from_term!(@terms.first, :first_term => true)
-            @terms[1..-1].each{|t| collect_indices_from_term! t }
-          end
+        end
+      end
+      
+      # Apply any properties passed when creating the expression.
+      # Also extracts the overall index structure of the sum, so unless these
+      # are set manually after or during initialization, this must be called
+      # to put the sum in a consistent state.
+      def apply_properties!(properties)
+        @terms ||= []
+        @indices = []
+        unless @terms.empty?
+          collect_indices_from_term!(@terms.first, :first_term => true)
+          @terms[1..-1].each{|t| collect_indices_from_term! t }
         end
       end
       

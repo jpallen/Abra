@@ -5,9 +5,17 @@ module Abra
       # LaTeX to render properly.
       attr_accessor :label
 
-      def initialize(options = {})
-        @label   = options[:label] if options.has_key?(:label)
-        @indices = options[:indices] if options.has_key?(:label)
+      # Initialize a new Symbol object and directly set its instance variables.
+      # This should not be accessed directly as it can create expressions
+      # in an inconsistent state.
+      def initialize(attributes = {}) # :nodoc:
+        @label   = attributes[:label]
+        @indices = attributes[:indices]
+      end
+      
+      # Apply any properties passed when creating the expression.
+      def apply_properties!(properties)
+        # Non-commutitivity etc. eventually.
       end
       
       # Returns the free indices on this symbol.

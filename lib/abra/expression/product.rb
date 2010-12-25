@@ -10,14 +10,27 @@ module Abra
         return @terms.dup # Don't give access to the actual array
       end
       
-      def initialize(properties = {})
-        if properties.has_key?(:terms)
-          @terms = properties[:terms]
+      # Initialize a new Product object and directly set its instance variables.
+      # This should not be accessed directly as it can create expressions
+      # in an inconsistent state.
+      def initialize(attributes = {}) # :nodoc:
+        if attributes.has_key?(:terms)
+          @terms = attributes[:terms]
           unless @terms.is_a?(Array) and @terms.select{|t| not t.is_a?(Expression::Base)}.empty?
-            raise ArgumentError, "expected :terms to be an Array of Expressions"
+            raise ArgumentError, "expected :terms to be an Array of Expressions but it was #{@terms}"
           end
-          contract_indices!(@terms.collect{|i| i.indices}.flatten, properties)
+          
+          # We don't contract the indices here since we also use this to build
+          # up new expressions from serializations, etc. and the contraction
+          # behaviour is handled seperately there.
         end
+      end
+      
+      # Apply any properties passed when creating the expression.
+      # Currently this is just figuring out which indices should be 
+      # contrated.
+      def apply_properties!(properties)
+        contract_indices!(properties)
       end
       
       # Returns the free indices at this level of the expression. These indices
@@ -62,7 +75,7 @@ module Abra
         
         @terms.insert(position, term)
                 
-        contract_indices!(@terms.collect{|i| i.indices}.flatten, properties)
+        contract_indices!(properties)
       end
       
       def inspect
@@ -84,15 +97,14 @@ module Abra
       end
       
     private
-      # Takes an Array of Index instances and will contract any that can be based
-      # on their labels and the properties of the indices. Note that you should pass 
-      # all indices that could be involved in the contraction even if they are already
-      # contracted so that we can warn about more than 2 indices, etc.
-      def contract_indices!(indices, properties = {})
+      
+      # Tries to contract any uncontracted indices in the product based on the
+      # index properties and any additional properties passed.
+      def contract_indices!(properties = {})
         properties = Abra::Expression.default_properties.merge(properties)
         # Reject any indices which are already contracted
         # (including with indices outside this expression)
-        indices = indices.dup
+        indices = self.terms.collect{|i| i.indices}.flatten
         until indices.empty?
           index = indices.first 
           indices_with_same_label = indices.select{|i| i.label == index.label}
