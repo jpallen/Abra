@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__) + '/..', 'spec_helper')
+require File.join(File.dirname(__FILE__) + '/../..', 'spec_helper')
 
 describe Abra::Expression::Product, '#indices' do
   it 'should return any free indices at this level of the expression' do

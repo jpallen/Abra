@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__) + '/..', 'spec_helper')
+require File.join(File.dirname(__FILE__) + '/../..', 'spec_helper')
 
 describe Abra::Expression::Base, '#serialize' do
   it 'should map indices to integer ids' do
