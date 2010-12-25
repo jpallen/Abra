@@ -10,7 +10,7 @@ describe Abra::Expression::Product, '#indices' do
   end
 end
 
-describe Abra::Expression::Product, '#contract_indices_based_on_labels!' do
+describe Abra::Expression::Product, 'automatic contraction' do
   it 'should contract indices with the same label' do
     e = Abra::Parser.parse('A_{a} B^{a b} C_b', :index_position_matters => false)
     # The bs should be contracted
@@ -20,11 +20,21 @@ describe Abra::Expression::Product, '#contract_indices_based_on_labels!' do
   
   it 'should not contract indices on the same level when :position_matters is true' do
     e = Abra::Parser.parse('A_{a b} B_{b c}', :index_position_matters => true)
-    e.terms.first.indices.last.should_not be_contracted_with(e.terms.last.indices.first)
+    e.terms.first.indices.last.should_not be_contracted
   end
   
   it 'should contract indices on the different levels when :position_matters is true' do
     e = Abra::Parser.parse('A_{a b} B^{b c}', :index_position_matters => true)
+    e.terms.first.indices.last.should be_contracted_with(e.terms.last.indices.first)
+  end
+  
+  it 'should not contract indices on the same level which are mentioned in :index_position_matters_for' do
+    e = Abra::Parser.parse('A_{a b} B_{b c}', :index_position_matters => false, :index_position_matters_for => ['b'])
+    e.terms.first.indices.last.should_not be_contracted
+  end 
+
+  it 'should contract indices on the same level which are mentioned in :index_position_does_not_matter_for' do
+    e = Abra::Parser.parse('A_{a b} B_{b c}', :index_position_matters => true, :index_position_does_not_matter_for => ['b'])
     e.terms.first.indices.last.should be_contracted_with(e.terms.last.indices.first)
   end
   
