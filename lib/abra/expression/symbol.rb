@@ -10,6 +10,19 @@ module Abra
         @indices = options[:indices] if options.has_key?(:label)
       end
       
+      # Returns the free indices on this symbol.
+      # TODO: This doesn't currently understand self contractions: R_{a}^{a}
+      def indices
+        @indices ||= []
+        @indices.dup
+      end
+      
+      # Returns all indices whether contracted or not.
+      def all_indices
+        @indices ||= []
+        @indices.dup
+      end
+      
       # Associates an array of indices to the symbol.
       #
       # By default these are added to the end of the symbol's existing indices
@@ -24,12 +37,13 @@ module Abra
           raise ArgumentError, "expected indices to be an Array of Index instances"
         end
         
+        @indices ||= []
         position = options[:position]
         if position == :start
           position = 0
         elsif position == :end
-          position = self.indices.length
-        elsif position > self.indices.length
+          position = @indices.length
+        elsif position > @indices.length
           raise ArgumentError, "position exceeds number of terms"
         end
         
@@ -60,6 +74,14 @@ module Abra
           end
         end
         return str
+      end
+      
+      def to_hash
+        {
+          :type    => :symbol,
+          :label   => self.label,
+          :indices => self.all_indices # Include indices that are contracted within the symbol
+        }
       end
     end
   end

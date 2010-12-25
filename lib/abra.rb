@@ -1,6 +1,8 @@
 require 'rubygems'
 require 'treetop'
 
+require File.dirname(__FILE__) + '/abra/core_ext'
+
 require File.dirname(__FILE__) + '/abra/parser/parser'
 
 require File.dirname(__FILE__) + '/abra/logger'

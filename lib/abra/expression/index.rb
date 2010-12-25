@@ -92,6 +92,17 @@ module Abra
         self.label
       end
       
+      def to_hash
+        {
+          :type               => :index,
+          :label              => self.label,
+          :position           => self.position,
+          :position_matters   => self.position_matters,
+          :contracted_with    => self.contracted_with,
+          :contracted_through => self.contracted_through
+        }
+      end
+      
     protected
       def set_contracted_with(index)
         @contracted_with = index

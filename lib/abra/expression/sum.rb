@@ -10,6 +10,30 @@ module Abra
         return @terms.dup
       end
       
+      # Returns an array of DistributedIndex instances. These represent
+      # the overall index structure of the sum and refer to the individual
+      # indices on each term.
+      #
+      # There should never be any contractions between two indices on the same
+      # sum since these would not be extracted from the constituent terms.
+      # For example, (A^{a b}_a + B^{a b}_a) would only have b as a DistributedIndex,
+      # It would not have [a,a,b] with the as contracted.
+      # TODO: There is potential for subtle bugs here if two DistributedIndex instances
+      # from the same sum are contracted after the expression is parsed.
+      #
+      # Note that modifying this array will not make any changes. Please use
+      # the helper methods instead.
+      def indices
+        @indices ||= []
+        return @indices.dup
+      end
+      
+      # All indices from all terms, including the DistributedIndex instances
+      # from the sum, and the component Index instances from each term in the sum
+      def all_indices
+        indices + self.terms.collect{|t| t.all_indices}.flatten
+      end
+      
       def initialize(attributes = {})
         if attributes.has_key?(:terms)
           @terms = attributes[:terms]
@@ -32,7 +56,7 @@ module Abra
       def insert_term!(term, properties = {})
         properties = {
           :position => :end
-        }.merge(options)
+        }.merge(properties)
         
         unless term.is_a?(Expression::Base)
           raise ArgumentError, "expected term to be an Expression but got #{term}"
@@ -49,11 +73,21 @@ module Abra
         
         @terms.insert(position, term)
         
-        self.collect_indices_from_term!(term)
+        collect_indices_from_term!(term)
+        
+        return true
       end
       
       def inspect
         self.terms.map{|o| o.inspect}.join(' + ')
+      end
+
+      def to_hash
+        {
+          :type    => :sum,
+          :terms   => self.terms.collect{|t| t.to_hash},
+          :indices => self.indices
+        }
       end
       
     private
@@ -79,12 +113,14 @@ module Abra
             unless options[:first_term]
               Abra.logger.warn("The index '#{index.label}' is not present in all terms")
             end
-            self.indices << DistributedIndex.new(:component_indices => [index])
+            @indices ||= []
+            @indices << DistributedIndex.new(:component_indices => [index])
           else
-            remaining_distributed_indices.reject!{|i| i == index}
+            remaining_distributed_indices.reject!{|i| i == distributed_index}
             distributed_index.add_component_index!(index)
           end
         end
+        
         unless remaining_distributed_indices.empty?
           for index in remaining_distributed_indices
             Abra.logger.warn("The index '#{index.label}' is not present in all terms")

@@ -32,6 +32,11 @@ module Abra
         return free_indices
       end
       
+      # Returns all indices from all terms, both free and contracted
+      def all_indices
+        self.terms.collect{|i| i.all_indices}.flatten
+      end
+      
       # Inserts a term into the product.
       # 
       # The term must be an instance of Expression. By default the term is inserted 
@@ -68,6 +73,14 @@ module Abra
             t.inspect
           end
         }.join(' ')
+      end
+      
+      def to_hash
+        {
+          :type  => :product,
+          :terms => self.terms.collect{|t| t.to_hash}
+          # indices are worked out from the indices on the terms
+        }
       end
       
     private

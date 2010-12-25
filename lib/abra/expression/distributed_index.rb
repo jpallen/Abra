@@ -30,7 +30,35 @@ module Abra
           attributes[:component_indices].each{|i| self.add_component_index! i }
         end
       end
+
+      def to_hash
+        {
+          :type               => :distributed_index,
+          :label              => self.label,
+          :position           => self.position,
+          :position_matters   => self.position_matters,
+          :contracted_with    => self.contracted_with,
+          :contracted_through => self.contracted_through,
+          :component_indices  => self.component_indices
+        }
+      end
+
+      def add_component_index!(index) # :nodoc:
+        @component_indices ||= []
+        @component_indices << index
+
+        # Recalculate over all position
+        positions = @component_indices.collect{|i| i.position}.uniq
+        if positions.size == 1
+          @position = positions.first
+        else
+          @position = POSITION_MIXED
+        end
+
+        @label = @component_indices.first.label
+      end
     
+    protected
       def set_contracted_with(index)
         @contracted_with = index
         for component_index in self.component_indices do
@@ -43,21 +71,6 @@ module Abra
         self.component_indices.each{|i| i.set_uncontracted}
         @contracted_with    = nil
         @contracted_through = nil
-      end
-      
-      def add_component_index!(index) # :nodoc:
-        @component_indices ||= []
-        @component_indices << index
-        
-        # Recalculate over all position
-        positions = @component_indices.collect{|i| i.position}.uniq
-        if positions.size == 1
-          @position = positions.first
-        else
-          @position = POSITION_MIXED
-        end
-        
-        @label = @component_indices.first.label
       end
     end
   end

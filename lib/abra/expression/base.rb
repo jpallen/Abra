@@ -44,9 +44,86 @@ module Abra
       # type of expression (Symbol, Sum, Product, etc).
       attr_reader :indices
       def indices # :nodoc:
-        @indices ||= []
+        raise NotImplementedError, "#{subclass} needs to override indices"
+      end
+      
+      # Recurses through the expression and returns all indices, contracted 
+      # or free, that are part of the expression.
+      def all_indices
+        raise NotImplementedError, "#{subclass} needs to override all_indices"
+      end
+      
+      def to_hash
+        raise NotImplementedError, "#{subclass} needs to override to_hash"
+      end
+      
+      # Returns a representation of the expression using native Ruby
+      # objects (Array, Hash, Fixnum, etc). The tree-like structure of 
+      # the expression is stored as a Hash. The indices are stored seperately
+      # and references via integer ids. This allows contraction properties to be 
+      # stored.
+      #
+      # For example,
+      # >> Abra::Parser.parse('(A_{a b} B^b + C_a) D^a').serialize
+      # =>  {
+      #       :expression => {
+      #         :type => :product,
+      #         :terms => [
+      #           {
+      #             :type => :sum,
+      #             :terms => [...],
+      #             :indices => [5]
+      #           },
+      #           {
+      #             :type => :symbol,
+      #             :label => 'C',
+      #             :indices => [6]
+      #           }
+      #         ]
+      #       },
+      #       :indices => {
+      #         1 => {:type => :index, :label => 'a', :contracted_with => 6, :contracted_through => 5},
+      #         2 => {:type => :index, :label => 'b', :contracted_with => 3, :contracted_through => nil},
+      #         3 => {:type => :index, :label => 'b', :contracted_with => 2, :contracted_through => nil},
+      #         4 => {:type => :index, :label => 'a', :contracted_with => 6, :contracted_through => 5},
+      #         5 => {:type => :distributed_index, :label => 'a', :contracted_with => 6, :contracted_through => nil,
+      #               :component_indices => [1,4]},
+      #         6 => {:type => :index, :label => 'a', :contracted_with => 5, :contracted_through => nil}
+      #       }
+      #     }
+      def serialize
+        all_indices = self.all_indices
+        # Create a hash where each key is an Index pointing to its unique id value
+        id = 0
+        index_ids = Hash[*all_indices.collect{|i| [i, id += 1]}.flatten] 
+        
+        # Create a hash where each key is the index id pointing to the serialized version of itself
+        serialized_indices = Hash[*all_indices.collect{|i| [index_ids[i], i.to_hash]}.flatten]
+
+        serialized_expression = self.to_hash
+        
+        for hash in [serialized_indices, serialized_expression] do
+          # The only non-native objects left in these hashes are references to other
+          # Index objects via contracts. We replace them all with the corresponding index id.
+          hash.replace_values!(:recurse => true) {|v|
+            if v.is_a?(Index)
+              if all_indices.include?(v)
+                index_ids[v]
+              else
+                nil # reference to an index outside the expression
+              end
+            else
+              v # Not an index so just leave it be
+            end
+          }
+        end
+        
+        return {
+          :expression => serialized_expression,
+          :indices    => serialized_indices
+        }
       end
     end
   end
-end
+end#
 
