@@ -8,6 +8,7 @@ require File.dirname(__FILE__) + '/abra/parser/parser'
 require File.dirname(__FILE__) + '/abra/logger'
 
 require File.dirname(__FILE__) + '/abra/expression/base'
+require File.dirname(__FILE__) + '/abra/expression/wrapper'
 require File.dirname(__FILE__) + '/abra/expression/symbol'
 require File.dirname(__FILE__) + '/abra/expression/index'
 require File.dirname(__FILE__) + '/abra/expression/distributed_index'

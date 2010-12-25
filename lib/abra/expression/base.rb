@@ -36,6 +36,12 @@ module Abra
       @default_properties ||= self.system_default_properties
     end
     
+    def self.new_from_serialization(serialization)
+      indices = Index.build_indices_from_serialization(serialization[:indices])
+      expression = Base.build_from_serialization(serialization[:expression], indices)
+      return expression
+    end
+    
     class Base
       # Returns an array of free indices at this level of the
       # expression. For example, in the expression F_{a b} G^b (assuming the bs are contracted), 
@@ -130,14 +136,9 @@ module Abra
         unless klass.ancestors.include?(Abra::Expression::Base)
           raise ArgumentError, "I can only build Abra::Expression objects from a serialization"
         end
-        expression = klass.new
+        expression = Abra::Expression::Wrapper.new(klass)
         expression.load_from_serialization!(serialization, indices)
         return expression
-      end
-      
-      def self.new_from_serialization(serialization)
-        indices = Index.build_indices_from_serialization(serialization[:indices])
-        expression = self.build_from_serialization(serialization[:expression], indices)
       end
 
       def ==(other)

@@ -69,7 +69,7 @@ module Abra
           :position => :end
         }.merge(properties)
         
-        unless term.is_a?(Expression::Base)
+        unless term.is_a?(Expression::Wrapper)
           raise ArgumentError, "expected term to be an Expression but got #{term}"
         end
         

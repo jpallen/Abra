@@ -55,7 +55,7 @@ module Abra
           :position => :end
         }.merge(properties)
         
-        unless term.is_a?(Expression::Base)
+        unless term.is_a?(Expression::Wrapper)
           raise ArgumentError, "expected term to be an Expression but got #{term}"
         end
         
@@ -75,7 +75,7 @@ module Abra
       
       def inspect
         self.terms.map{|t| 
-          if t.is_a?(Sum)
+          if t.expression.is_a?(Sum)
             "(#{t.inspect})"
           else 
             t.inspect

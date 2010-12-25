@@ -12,14 +12,14 @@ grammar ExpressionGrammar
   rule sum
     product space "+" space sum {
       def expression(properties = {})
-        real_sum = sum.expression(properties)
-        unless real_sum.is_a?(Abra::Expression::Sum)
-          sum = Abra::Expression::Sum.new(:terms => [product.expression(properties), real_sum])
+        sum_wrapper = sum.expression(properties)
+        unless sum_wrapper.expression.is_a?(Abra::Expression::Sum)
+          sum = Abra::Expression::Wrapper.new(Abra::Expression::Sum, :terms => [product.expression(properties), sum_wrapper])
           sum.apply_properties!(properties)
           return sum
         else
-          real_sum.insert_term!(product.expression(properties), properties.merge(:position => :start))
-          return real_sum
+          sum_wrapper.insert_term!(product.expression(properties), properties.merge(:position => :start))
+          return sum_wrapper
         end
       end
     }
@@ -32,14 +32,14 @@ grammar ExpressionGrammar
   rule product
     primary space product {
       def expression(properties = {})
-        real_product = product.expression(properties)
-        unless real_product.is_a?(Abra::Expression::Product)
-          product = Abra::Expression::Product.new(:terms => [primary.expression(properties), real_product])
+        product_wrapper = product.expression(properties)
+        unless product_wrapper.expression.is_a?(Abra::Expression::Product)
+          product = Abra::Expression::Wrapper.new(Abra::Expression::Product, :terms => [primary.expression(properties), product_wrapper])
           product.apply_properties!(properties)
           return product
         else
-          real_product.insert_term!(primary.expression(properties), properties.merge(:position => :start))
-          return real_product
+          product_wrapper.insert_term!(primary.expression(properties), properties.merge(:position => :start))
+          return product_wrapper
         end
       end
     } /
@@ -77,7 +77,7 @@ grammar ExpressionGrammar
   rule symbol_base
     '\\'? [a-zA-Z]+ {
       def expression(properties = {})
-        symbol = Abra::Expression::Symbol.new(:label => text_value)
+        symbol = Abra::Expression::Wrapper.new(Abra::Expression::Symbol, :label => text_value)
         symbol.apply_properties!(properties)
         return symbol
       end

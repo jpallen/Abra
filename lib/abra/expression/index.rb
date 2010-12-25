@@ -97,9 +97,9 @@ module Abra
         end
       end
 
-      def inspect
-        self.label
-      end
+      #def inspect
+      #  self.label
+      #end
       
       def to_hash
         {

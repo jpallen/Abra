@@ -69,6 +69,6 @@ end
 describe Abra::Expression::Base, '.new_from_serialization' do
   it 'should build an expression with the correct propeties' do
     e = Abra::Parser.parse('(A_{a b} B^b + C_a) D_a', :index_position_matters_for => ['b'])
-    Abra::Expression::Base.new_from_serialization(e.serialize).serialize.should eql e.serialize
+    Abra::Expression.new_from_serialization(e.serialize).should eql e
   end
 end
